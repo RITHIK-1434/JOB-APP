@@ -7,7 +7,7 @@ const auth = require('../middleware/auth');
 // Apply for a job
 router.post('/', auth, async (req, res) => {
   try {
-    const { jobId, coverLetter } = req.body;
+    const { jobId, coverLetter, resumeUrl } = req.body;
 
     // Check if job exists
     const job = await Job.findById(jobId);
@@ -18,7 +18,7 @@ router.post('/', auth, async (req, res) => {
     // Check if already applied
     const existingApplication = await Application.findOne({
       job: jobId,
-      applicant: req.user.id
+      applicant: req.user.userId
     });
 
     if (existingApplication) {
@@ -27,24 +27,31 @@ router.post('/', auth, async (req, res) => {
 
     const application = new Application({
       job: jobId,
-      applicant: req.user.id,
-      coverLetter
+      applicant: req.user.userId,
+      coverLetter,
+      resumeUrl
     });
 
     await application.save();
+
+    // Add applicant to job's applicants array
+    job.applicants.push(req.user.userId);
+    await job.save();
+
     res.status(201).json({ message: 'Application submitted successfully', application });
   } catch (error) {
+    console.error('Apply error:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
 
-// Get all applications for a user
-router.get('/my-applications', auth, async (req, res) => {
+// CHANGE THIS: from '/my-applications' to '/my'
+router.get('/my', auth, async (req, res) => {
   try {
-    const applications = await Application.find({ applicant: req.user.id })
+    const applications = await Application.find({ applicant: req.user.userId })
       .populate('job')
       .sort({ appliedAt: -1 });
-    res.json(applications);
+    res.json({ applications });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
@@ -60,22 +67,22 @@ router.get('/job/:jobId', auth, async (req, res) => {
     }
 
     // Check if user is the employer
-    if (job.employer.toString() !== req.user.id) {
+    if (job.postedBy.toString() !== req.user.userId) {
       return res.status(403).json({ message: 'Not authorized' });
     }
 
     const applications = await Application.find({ job: req.params.jobId })
-      .populate('applicant', 'name email')
+      .populate('applicant', 'name email phone')
       .sort({ appliedAt: -1 });
     
-    res.json(applications);
+    res.json({ applications });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
 
-// Update application status
-router.patch('/:id/status', auth, async (req, res) => {
+// CHANGE THIS: from '/:id/status' to '/:id/status'
+router.put('/:id/status', auth, async (req, res) => {
   try {
     const { status } = req.body;
     const application = await Application.findById(req.params.id).populate('job');
@@ -85,7 +92,7 @@ router.patch('/:id/status', auth, async (req, res) => {
     }
 
     // Check if user is the employer
-    if (application.job.employer.toString() !== req.user.id) {
+    if (application.job.postedBy.toString() !== req.user.userId) {
       return res.status(403).json({ message: 'Not authorized' });
     }
 
@@ -94,6 +101,29 @@ router.patch('/:id/status', auth, async (req, res) => {
 
     res.json({ message: 'Application status updated', application });
   } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
+// ADD THIS: Delete application route
+router.delete('/:id', auth, async (req, res) => {
+  try {
+    const application = await Application.findById(req.params.id);
+
+    if (!application) {
+      return res.status(404).json({ message: 'Application not found' });
+    }
+
+    // Check if user is the applicant
+    if (application.applicant.toString() !== req.user.userId) {
+      return res.status(403).json({ message: 'Not authorized' });
+    }
+
+    await Application.findByIdAndDelete(req.params.id);
+
+    res.json({ message: 'Application withdrawn successfully' });
+  } catch (error) {
+    console.error('Delete application error:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
