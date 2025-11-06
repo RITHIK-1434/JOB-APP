@@ -10,7 +10,11 @@ const app = express();
 
 // Middleware
 app.use(cors({
-     origin: ['https://jobify-frontend.onrender.com', 'http://localhost:3001'],
+     origin: [
+       'https://jobify-frontend-1sp45ztwh-rithiks-projects-0d3d3ea.vercel.app',
+       'https://jobify-frontend.vercel.app',
+       'http://localhost:3001'
+     ],
      credentials: true
    }));
 app.use(express.json());
