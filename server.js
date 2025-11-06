@@ -10,13 +10,35 @@ const app = express();
 
 // Middleware
 app.use(cors({
-     origin: [
-       'https://jobify-frontend-1sp45ztwh-rithiks-projects-0d3d3ea.vercel.app',
-       'https://jobify-frontend.vercel.app',
-       'http://localhost:3001'
-     ],
-     credentials: true
-   }));
+  origin: function(origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl)
+    if (!origin) return callback(null, true);
+    
+    // Allow all Vercel preview and production URLs
+    const allowedOrigins = [
+      'http://localhost:3001',
+      'http://localhost:3000',
+      /\.vercel\.app$/  // This allows ALL Vercel domains
+    ];
+    
+    // Check if origin matches any allowed pattern
+    const isAllowed = allowedOrigins.some(pattern => {
+      if (pattern instanceof RegExp) {
+        return pattern.test(origin);
+      }
+      return pattern === origin;
+    });
+    
+    if (isAllowed) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
