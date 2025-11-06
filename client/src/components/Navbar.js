@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
-import { FaBriefcase, FaUser, FaSignOutAlt, FaPlusCircle } from 'react-icons/fa';
+import { FaBriefcase, FaUser, FaSignOutAlt, FaPlusCircle, FaStar } from 'react-icons/fa';
 
 const Navbar = () => {
   const { isAuthenticated, user, logout } = useContext(AuthContext);
@@ -16,8 +16,9 @@ const Navbar = () => {
     <nav className="navbar navbar-expand-lg navbar-gradient sticky-top">
       <div className="container">
         <Link className="navbar-brand text-white fw-bold" to="/">
-          <FaBriefcase className="me-2" />
-          JobPortal
+          <FaStar className="me-2" style={{ animation: 'pulse 2s ease-in-out infinite' }} />
+          Jobify
+          <FaStar className="ms-2" style={{ animation: 'pulse 2s ease-in-out infinite' }} />
         </Link>
         
         <button 
@@ -25,8 +26,9 @@ const Navbar = () => {
           type="button" 
           data-bs-toggle="collapse" 
           data-bs-target="#navbarNav"
+          style={{ borderColor: 'white' }}
         >
-          <span className="navbar-toggler-icon"></span>
+          <span className="navbar-toggler-icon" style={{ filter: 'invert(1)' }}></span>
         </button>
         
         <div className="collapse navbar-collapse" id="navbarNav">
@@ -69,8 +71,14 @@ const Navbar = () => {
                   <Link className="nav-link text-white" to="/login">Login</Link>
                 </li>
                 <li className="nav-item">
-                  <Link className="btn btn-light btn-sm ms-2" to="/register">
-                    Register
+                  <Link className="btn btn-light btn-sm ms-2" to="/register" style={{
+                    fontWeight: '600',
+                    borderRadius: '20px',
+                    padding: '0.5rem 1.5rem',
+                    transition: 'all 0.3s ease',
+                    boxShadow: '0 4px 15px rgba(255, 255, 255, 0.3)'
+                  }}>
+                    Get Started
                   </Link>
                 </li>
               </>
