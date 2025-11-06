@@ -10,7 +10,7 @@ const app = express();
 
 // Middleware
 app.use(cors({
-     origin: ['https://jobify-frontend.onrender.com', 'http://localhost:3001'],
+     origin: ['https://jobify-frontend-zawb.onrender.com', 'http://localhost:3001'],
      credentials: true
    }));
 app.use(express.json());
