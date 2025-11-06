@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'https://jobify-backend-4pt2.onrender.com';
+const API_URL = 'https://jobify-backend-dnc2.onrender.com';
 
 // Set default base URL
 axios.defaults.baseURL = API_URL;
