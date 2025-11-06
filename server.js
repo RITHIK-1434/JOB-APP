@@ -9,35 +9,13 @@ dotenv.config();
 const app = express();
 
 // Middleware
+const allowedOrigins = process.env.ALLOWED_ORIGINS 
+  ? process.env.ALLOWED_ORIGINS.split(',') 
+  : ['http://localhost:3001'];
+
 app.use(cors({
-  origin: function(origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl)
-    if (!origin) return callback(null, true);
-    
-    // Allow all Vercel preview and production URLs
-    const allowedOrigins = [
-      'http://localhost:3001',
-      'http://localhost:3000',
-      /\.vercel\.app$/  // This allows ALL Vercel domains
-    ];
-    
-    // Check if origin matches any allowed pattern
-    const isAllowed = allowedOrigins.some(pattern => {
-      if (pattern instanceof RegExp) {
-        return pattern.test(origin);
-      }
-      return pattern === origin;
-    });
-    
-    if (isAllowed) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  origin: allowedOrigins,
+  credentials: true
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
